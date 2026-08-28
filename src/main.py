@@ -26,7 +26,6 @@ def analisar_base(nome, df):
 
 
 def main():
-
     arquivo = "data/raw/teste_bi_base_crua.xlsx"
 
     print("Carregando bases...")
@@ -51,6 +50,49 @@ def main():
     analisar_base("ASSOCIADOS", associados)
     analisar_base("PRODUTOS", produtos)
     analisar_base("MOVIMENTACAO", movimentacao)
+
+    print("\n--- ASSOCIADOS COM RENDA NÃO INFORMADA ---")
+
+    renda_nula = associados[
+        associados["RENDA_MENSAL"].isnull()
+    ]
+
+    print(renda_nula)
+
+    print("\n--- ESTATÍSTICAS DE RENDA ---")
+    print(associados["RENDA_MENSAL"].describe())
+
+    print("\n--- MEDIANA DE RENDA POR AGÊNCIA ---")
+    print(
+        associados.groupby("AGENCIA")["RENDA_MENSAL"]
+        .median()
+    )
+
+    print("\n--- QUANTIDADE DE ASSOCIADOS POR AGÊNCIA ---")
+    print(
+        associados["AGENCIA"]
+        .value_counts()
+        .sort_index()
+    )
+
+    print("\n--- CIDADES CADASTRADAS ---")
+    print(
+        sorted(associados["CIDADE"].unique())
+    )
+
+    print("\n--- DATAS DE ASSOCIAÇÃO FUTURAS ---")
+
+    hoje = pd.Timestamp.today().normalize()
+
+    datas_futuras = associados[
+        associados["DATA_ASSOCIACAO"] > hoje
+    ]
+
+    print(datas_futuras)
+
+    print(
+        f"\nQuantidade de datas futuras: {len(datas_futuras)}"
+    )
 
 
 if __name__ == "__main__":

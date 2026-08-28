@@ -1,4 +1,5 @@
 import pandas as pd
+from carregar_dados import carregar_dados
 
 
 def analisar_base(nome, df):
@@ -26,26 +27,7 @@ def analisar_base(nome, df):
 
 
 def main():
-    arquivo = "data/raw/teste_bi_base_crua.xlsx"
-
-    print("Carregando bases...")
-
-    associados = pd.read_excel(
-        arquivo,
-        sheet_name="Associados"
-    )
-
-    produtos = pd.read_excel(
-        arquivo,
-        sheet_name="Produtos"
-    )
-
-    movimentacao = pd.read_excel(
-        arquivo,
-        sheet_name="Movimentacao"
-    )
-
-    print("Bases carregadas com sucesso!")
+    associados, produtos, movimentacao = carregar_dados()
 
     analisar_base("ASSOCIADOS", associados)
     analisar_base("PRODUTOS", produtos)

@@ -1,0 +1,12 @@
+# Ambiente virtual
+.venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# Arquivos temporários do Excel
+~$*.xlsx

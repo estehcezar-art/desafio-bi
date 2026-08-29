@@ -1,6 +1,7 @@
 import pandas as pd
 from carregar_dados import carregar_dados
-
+from tratamento import (tratar_associados,tratar_produtos,tratar_movimentacao)
+from indicadores import criar_indicadores_produtos
 
 def analisar_base(nome, df):
     print(f"\n{'=' * 50}")
@@ -32,50 +33,84 @@ def main():
     analisar_base("ASSOCIADOS", associados)
     analisar_base("PRODUTOS", produtos)
     analisar_base("MOVIMENTACAO", movimentacao)
-
-    print("\n--- ASSOCIADOS COM RENDA NÃO INFORMADA ---")
-
-    renda_nula = associados[
-        associados["RENDA_MENSAL"].isnull()
-    ]
-
-    print(renda_nula)
-
-    print("\n--- ESTATÍSTICAS DE RENDA ---")
-    print(associados["RENDA_MENSAL"].describe())
-
-    print("\n--- MEDIANA DE RENDA POR AGÊNCIA ---")
-    print(
-        associados.groupby("AGENCIA")["RENDA_MENSAL"]
-        .median()
-    )
-
-    print("\n--- QUANTIDADE DE ASSOCIADOS POR AGÊNCIA ---")
-    print(
-        associados["AGENCIA"]
-        .value_counts()
-        .sort_index()
-    )
-
-    print("\n--- CIDADES CADASTRADAS ---")
-    print(
-        sorted(associados["CIDADE"].unique())
-    )
-
     print("\n--- DATAS DE ASSOCIAÇÃO FUTURAS ---")
 
     hoje = pd.Timestamp.today().normalize()
 
-    datas_futuras = associados[
-        associados["DATA_ASSOCIACAO"] > hoje
-    ]
+    datas_futuras = associados[associados["DATA_ASSOCIACAO"] > hoje]
 
     print(datas_futuras)
 
-    print(
-        f"\nQuantidade de datas futuras: {len(datas_futuras)}"
-    )
+    print( f"\nQuantidade de datas futuras: {len(datas_futuras)}")
 
+    associados_tratados = tratar_associados(associados)
+
+    print("\n" + "=" * 50)
+    print("VALIDAÇÃO APÓS TRATAMENTO")
+    print("=" * 50)
+
+    print("\nValores nulos:")
+    print(associados_tratados.isnull().sum())
+
+    print("\nCidades:")
+    print(sorted(associados_tratados["CIDADE"].unique()))
+
+    print("\nRegistros duplicados:")
+    print(associados_tratados.duplicated().sum())
+
+    produtos_tratados = tratar_produtos(produtos)
+
+    print("\n" + "=" * 50)
+    print("VALIDAÇÃO DA BASE DE PRODUTOS")
+    print("=" * 50)
+
+    colunas_produtos = [
+    "CONTA_CORRENTE",
+    "CARTAO",
+    "CREDITO",
+    "INVESTIMENTO",
+    "CONSORCIO",
+    "SEGURO"
+    ]
+
+    for coluna in colunas_produtos:
+        print(f"\n{coluna}:")
+        print(produtos_tratados[coluna].value_counts(dropna=False))
+
+    produtos_indicadores = criar_indicadores_produtos(produtos_tratados)
+
+    print("\n" + "=" * 50)
+    print("INDICADORES DE PRODUTOS")
+    print("=" * 50)
+
+    print(produtos_indicadores[["CHAVE", "QTD_PRODUTOS"]].head(10))
+
+    print("\nDistribuição da quantidade de produtos:")
+    print(produtos_indicadores["QTD_PRODUTOS"].value_counts().sort_index())
+
+    movimentacao_tratada = tratar_movimentacao(movimentacao)
+
+    print("\n" + "=" * 50)
+    print("VALIDAÇÃO DA BASE DE MOVIMENTAÇÃO")
+    print("=" * 50)
+
+    colunas_movimentacao = [
+    "SALDO_MEDIO",
+    "PIX_MENSAL",
+    "COMPRAS_CARTAO"
+    ]
+
+    for coluna in colunas_movimentacao:
+        print(f"\n--- {coluna} ---")
+
+        print("Estatísticas:")
+        print(movimentacao_tratada[coluna].describe())
+
+        print(f"Valores negativos: "
+              f"{(movimentacao_tratada[coluna] < 0).sum()}")
+
+        print(f"Valores iguais a zero: "
+              f"{(movimentacao_tratada[coluna] == 0).sum()}")
 
 if __name__ == "__main__":
     main()

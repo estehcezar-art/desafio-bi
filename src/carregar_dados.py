@@ -6,20 +6,11 @@ def carregar_dados():
 
     print("Carregando bases...")
 
-    associados = pd.read_excel(
-        arquivo,
-        sheet_name="Associados"
-    )
+    associados = pd.read_excel(arquivo,sheet_name="Associados")
 
-    produtos = pd.read_excel(
-        arquivo,
-        sheet_name="Produtos"
-    )
+    produtos = pd.read_excel(arquivo,sheet_name="Produtos")
 
-    movimentacao = pd.read_excel(
-        arquivo,
-        sheet_name="Movimentacao"
-    )
+    movimentacao = pd.read_excel(arquivo,sheet_name="Movimentacao")
 
     print("Bases carregadas com sucesso!")
 

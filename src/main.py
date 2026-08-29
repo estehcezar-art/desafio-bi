@@ -1,7 +1,11 @@
 import pandas as pd
 from carregar_dados import carregar_dados
-from tratamento import (tratar_associados,tratar_produtos,tratar_movimentacao)
-from indicadores import criar_indicadores_produtos
+from tratamento import (tratar_associados,
+                        tratar_produtos,
+                        tratar_movimentacao)
+from indicadores import (criar_indicadores_produtos,
+                         criar_indicadores_associados)
+from consolidacao import consolidar_bases
 
 def analisar_base(nome, df):
     print(f"\n{'=' * 50}")
@@ -33,6 +37,7 @@ def main():
     analisar_base("ASSOCIADOS", associados)
     analisar_base("PRODUTOS", produtos)
     analisar_base("MOVIMENTACAO", movimentacao)
+
     print("\n--- DATAS DE ASSOCIAÇÃO FUTURAS ---")
 
     hoje = pd.Timestamp.today().normalize()
@@ -58,20 +63,39 @@ def main():
     print("\nRegistros duplicados:")
     print(associados_tratados.duplicated().sum())
 
+    print("\n" + "=" * 50)
+
+    associados_indicadores = criar_indicadores_associados(associados_tratados)
+
+    print("INDICADORES DE ASSOCIADOS")
+    print("=" * 50)
+
+    print(associados_indicadores[["CHAVE",
+                                  "RENDA_MENSAL",
+                                  "FAIXA_RENDA",
+                                  "DATA_ASSOCIACAO",
+                                  "TEMPO_RELACIONAMENTO_ANOS"]
+                                ].head(10)
+         )
+
+    print("\nDistribuição por faixa de renda:")
+    print(associados_indicadores["FAIXA_RENDA"].value_counts().sort_index())
+
+    print("\nTempos de relacionamento nulos:")
+    print( associados_indicadores["TEMPO_RELACIONAMENTO_ANOS"].isnull().sum()) 
+
     produtos_tratados = tratar_produtos(produtos)
 
     print("\n" + "=" * 50)
     print("VALIDAÇÃO DA BASE DE PRODUTOS")
     print("=" * 50)
 
-    colunas_produtos = [
-    "CONTA_CORRENTE",
-    "CARTAO",
-    "CREDITO",
-    "INVESTIMENTO",
-    "CONSORCIO",
-    "SEGURO"
-    ]
+    colunas_produtos = ["CONTA_CORRENTE",
+                        "CARTAO",
+                        "CREDITO",
+                        "INVESTIMENTO",
+                        "CONSORCIO",
+                        "SEGURO"]
 
     for coluna in colunas_produtos:
         print(f"\n{coluna}:")
@@ -94,11 +118,9 @@ def main():
     print("VALIDAÇÃO DA BASE DE MOVIMENTAÇÃO")
     print("=" * 50)
 
-    colunas_movimentacao = [
-    "SALDO_MEDIO",
-    "PIX_MENSAL",
-    "COMPRAS_CARTAO"
-    ]
+    colunas_movimentacao = ["SALDO_MEDIO",
+                            "PIX_MENSAL",
+                            "COMPRAS_CARTAO"]
 
     for coluna in colunas_movimentacao:
         print(f"\n--- {coluna} ---")
@@ -111,6 +133,23 @@ def main():
 
         print(f"Valores iguais a zero: "
               f"{(movimentacao_tratada[coluna] == 0).sum()}")
+
+    base_consolidada = consolidar_bases(associados_indicadores,
+                                        produtos_indicadores,
+                                        movimentacao_tratada)    
+
+    print("\n" + "=" * 50)
+    print("BASE CONSOLIDADA")
+    print("=" * 50)
+
+    print(f"\nQuantidade de registros: {len(base_consolidada)}")
+    print(f"Quantidade de colunas: {len(base_consolidada.columns)}")
+
+    print("\nColunas:")
+    print(base_consolidada.columns.tolist())
+
+    print("\nPrimeiros registros:")
+    print(base_consolidada.head())
 
 if __name__ == "__main__":
     main()

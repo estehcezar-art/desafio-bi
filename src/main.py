@@ -6,6 +6,7 @@ from tratamento import (tratar_associados,
 from indicadores import (criar_indicadores_produtos,
                          criar_indicadores_associados)
 from consolidacao import consolidar_bases
+from classificacao import classificar_associados
 
 def analisar_base(nome, df):
     print(f"\n{'=' * 50}")
@@ -150,6 +151,26 @@ def main():
 
     print("\nPrimeiros registros:")
     print(base_consolidada.head())
+
+    base_classificada = classificar_associados(base_consolidada)
+
+    print("\n" + "=" * 50)
+    print("CLASSIFICAÇÃO DOS ASSOCIADOS")
+    print("=" * 50)
+
+    print(base_classificada[["CHAVE",
+                             "QTD_PRODUTOS",
+                             "TEMPO_RELACIONAMENTO_ANOS",
+                             "SALDO_MEDIO",
+                             "PIX_MENSAL",
+                             "COMPRAS_CARTAO",
+                             "SCORE",
+                             "CLASSIFICACAO"]
+                           ].head(10)
+         )
+
+    print("\nDistribuição das classificações:")
+    print(base_classificada["CLASSIFICACAO"].value_counts())
 
 if __name__ == "__main__":
     main()

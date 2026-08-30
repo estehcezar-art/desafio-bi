@@ -19,12 +19,12 @@ def classificar_associados(base):
     ] += 1
 
     base.loc[
-        base["TEMPO_RELACIONAMENTO_ANOS"] >= 2,
+        base["TEMPO_RELACIONAMENTO_MESES"] >= 24,
         "SCORE"
     ] += 1
 
     base.loc[
-        base["TEMPO_RELACIONAMENTO_ANOS"] >= 4,
+        base["TEMPO_RELACIONAMENTO_MESES"] >= 48,
         "SCORE"
     ] += 1
 

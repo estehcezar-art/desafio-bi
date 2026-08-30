@@ -16,16 +16,44 @@ def criar_indicadores_produtos(produtos):
 
     return produtos
 
+def formatar_tempo_relacionamento(total_meses):
+    if pd.isna(total_meses):
+        return pd.NA
+
+    anos = int(total_meses // 12)
+    meses = int(total_meses % 12)
+
+    partes = []
+
+    if anos > 0:
+        partes.append(f"{anos} {'ano' if anos == 1 else 'anos'}")
+
+    if meses > 0:
+        partes.append(f"{meses} {'mês' if meses == 1 else 'meses'}")
+
+    if not partes:
+        return "0 meses"
+
+    return " e ".join(partes)
+
 def criar_indicadores_associados(associados):
     associados = associados.copy()
 
     hoje = pd.Timestamp.today().normalize()
 
-    associados["TEMPO_RELACIONAMENTO_ANOS"] = ((hoje - associados["DATA_ASSOCIACAO"]).dt.days / 365.25)
+    datas = associados["DATA_ASSOCIACAO"]
 
-    associados.loc[associados["DATA_ASSOCIACAO"] > hoje, "TEMPO_RELACIONAMENTO_ANOS"] = pd.NA
+    meses = ((hoje.year - datas.dt.year) * 12 
+             + (hoje.month - datas.dt.month)
+             - (hoje.day < datas.dt.day).astype(int))
 
-    associados["TEMPO_RELACIONAMENTO_ANOS"] = (associados["TEMPO_RELACIONAMENTO_ANOS"].round(2))
+    meses = meses.where(datas <= hoje, pd.NA)
+
+    associados["TEMPO_RELACIONAMENTO_MESES"] = meses.astype("Int64")
+
+    associados["TEMPO_RELACIONAMENTO"] = (
+        associados["TEMPO_RELACIONAMENTO_MESES"]
+        .apply(formatar_tempo_relacionamento))
 
     associados["FAIXA_RENDA"] = pd.cut(
         associados["RENDA_MENSAL"],

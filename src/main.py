@@ -7,6 +7,7 @@ from indicadores import (criar_indicadores_produtos,
                          criar_indicadores_associados)
 from consolidacao import consolidar_bases
 from classificacao import classificar_associados
+from exportacao import exportar_base
 
 def analisar_base(nome, df):
     print(f"\n{'=' * 50}")
@@ -75,7 +76,8 @@ def main():
                                   "RENDA_MENSAL",
                                   "FAIXA_RENDA",
                                   "DATA_ASSOCIACAO",
-                                  "TEMPO_RELACIONAMENTO_ANOS"]
+                                  "TEMPO_RELACIONAMENTO_MESES",
+                                  "TEMPO_RELACIONAMENTO"]
                                 ].head(10)
          )
 
@@ -83,7 +85,8 @@ def main():
     print(associados_indicadores["FAIXA_RENDA"].value_counts().sort_index())
 
     print("\nTempos de relacionamento nulos:")
-    print( associados_indicadores["TEMPO_RELACIONAMENTO_ANOS"].isnull().sum()) 
+    print("Meses:",associados_indicadores["TEMPO_RELACIONAMENTO_MESES"].isnull().sum())
+    print(associados_indicadores["TEMPO_RELACIONAMENTO"].isnull().sum()) 
 
     produtos_tratados = tratar_produtos(produtos)
 
@@ -160,7 +163,7 @@ def main():
 
     print(base_classificada[["CHAVE",
                              "QTD_PRODUTOS",
-                             "TEMPO_RELACIONAMENTO_ANOS",
+                             "TEMPO_RELACIONAMENTO",
                              "SALDO_MEDIO",
                              "PIX_MENSAL",
                              "COMPRAS_CARTAO",
@@ -171,6 +174,8 @@ def main():
 
     print("\nDistribuição das classificações:")
     print(base_classificada["CLASSIFICACAO"].value_counts())
+
+    exportar_base(base_classificada)
 
 if __name__ == "__main__":
     main()

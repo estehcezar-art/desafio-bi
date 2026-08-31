@@ -2,7 +2,7 @@
 
 Projeto desenvolvido como parte de um desafio técnico de BI com o objetivo de realizar o tratamento, consolidação e análise de dados de associados, produtos e movimentações financeiras.
 
-O processamento dos dados foi desenvolvido em Python e a base resultante será utilizada para construção de um dashboard no Power BI.
+O processamento dos dados foi desenvolvido em Python e a base resultante é utilizada como fonte para o dashboard desenvolvido no Power BI.
 
 ## Objetivo
 
@@ -15,6 +15,7 @@ As principais etapas desenvolvidas são:
 - criação de indicadores;
 - consolidação das bases através da chave do associado;
 - criação de uma metodologia de classificação dos associados;
+- identificação de oportunidades de relacionamento;
 - geração de uma base processada para utilização no Power BI.
 
 ## Tecnologias utilizadas
@@ -37,7 +38,7 @@ desafio-bi/
 │   │   └── teste_bi_base_crua.xlsx
 │   │
 │   └── processed/
-│       └── teste_bi_classificada.xlsx
+│       └── [arquivos gerados durante a execução]
 │
 ├── src/
 │   ├── main.py
@@ -46,6 +47,7 @@ desafio-bi/
 │   ├── indicadores.py
 │   ├── consolidacao.py
 │   ├── classificacao.py
+│   ├── oportunidades.py
 │   └── exportacao.py
 │
 ├── .gitignore
@@ -152,6 +154,24 @@ Foi criado o indicador:
 
 Ele representa a quantidade total de produtos utilizados por cada associado.
 
+### Faixa de produtos
+
+Além da quantidade total de produtos, foi criado o indicador:
+
+`FAIXA_PRODUTOS`
+
+Esse indicador agrupa os associados de acordo com a quantidade de produtos utilizados, facilitando a análise do nível de utilização dos produtos da instituição.
+
+Os associados são distribuídos nas seguintes faixas:
+
+- 0 a 1 produto
+- 2 a 3 produtos
+- 4 a 6 produtos
+
+A classificação é realizada a partir do indicador `QTD_PRODUTOS`.
+
+O campo é utilizado nas análises do dashboard para visualizar a distribuição dos associados de acordo com a quantidade de produtos utilizados.
+
 ### Faixa de renda
 
 Os associados foram classificados nas seguintes faixas:
@@ -180,6 +200,30 @@ Utilizado para apresentação, em formato mais amigável, por exemplo:
 6 anos e 1 mês
 5 anos
 ```
+
+### Faixa de tempo de relacionamento
+
+Além dos campos utilizados para cálculo e apresentação do tempo de relacionamento, foi criado o indicador:
+
+`FAIXA_TEMPO_RELACIONAMENTO`
+
+Esse indicador agrupa os associados de acordo com o período de relacionamento com a instituição, permitindo comparar grupos com diferentes tempos de associação.
+
+A classificação utiliza o campo `TEMPO_RELACIONAMENTO_MESES` e considera as seguintes faixas:
+
+- Até 2 anos
+- De 2 a 5 anos
+- De 5 a 8 anos
+- Acima de 8 anos
+
+Os limites utilizados no cálculo correspondem a:
+
+- até 24 meses;
+- acima de 24 e até 60 meses;
+- acima de 60 e até 96 meses;
+- acima de 96 meses.
+
+Para registros cuja `DATA_ASSOCIACAO` é posterior à data atual, o tempo de relacionamento não é calculado. Consequentemente, esses registros não recebem uma faixa de tempo de relacionamento, evitando classificações baseadas em períodos negativos.
 
 ## Consolidação das bases
 
@@ -251,6 +295,104 @@ Na execução atual da base foram obtidos:
 | Engajado | 12 |
 | **Total** | **1.000** |
 
+## Identificação de oportunidades
+
+Além da classificação dos associados, foram desenvolvidas regras para
+identificar perfis que podem representar oportunidades de ampliação do
+relacionamento e utilização dos produtos da instituição.
+
+As regras são calculadas após a consolidação e classificação da base.
+
+### Alta Renda + Poucos Produtos
+
+Identifica associados com renda mensal elevada, mas que possuem poucos
+produtos.
+
+Regra:
+
+`RENDA_MENSAL > 15000 E QTD_PRODUTOS <= 2`
+
+Na base analisada, foram identificados **178 associados** nessa condição.
+
+Esse grupo pode representar uma oportunidade de ampliação do relacionamento,
+considerando que possui renda elevada e baixa quantidade de produtos
+contratados.
+
+### Baixa Utilização
+
+Identifica associados cuja utilização de PIX e compras no cartão está abaixo
+do comportamento mediano observado na própria base.
+
+São calculadas as medianas de:
+
+- `PIX_MENSAL`;
+- `COMPRAS_CARTAO`.
+
+Regra:
+
+`PIX_MENSAL < MEDIANA_PIX E COMPRAS_CARTAO < MEDIANA_CARTAO`
+
+Na base analisada, foram identificados **245 associados** nessa condição.
+
+A utilização das medianas permite definir os limites de acordo com a
+distribuição dos próprios dados, evitando a utilização de valores arbitrários.
+
+### Potencial de Crescimento
+
+Identifica associados classificados como `Inicial` ou `Em Desenvolvimento`
+que apresentam renda mensal ou saldo médio acima da mediana da base.
+
+São calculadas as medianas de:
+
+- `RENDA_MENSAL`;
+- `SALDO_MEDIO`.
+
+Regra:
+
+`(CLASSIFICACAO = "Inicial" OU CLASSIFICACAO = "Em Desenvolvimento")`
+
+E:
+
+`(RENDA_MENSAL > MEDIANA_RENDA OU SALDO_MEDIO > MEDIANA_SALDO)`
+
+Na base analisada, foram identificados **439 associados** nessa condição.
+
+A regra busca identificar associados que ainda se encontram nos níveis
+iniciais de relacionamento, mas apresentam características financeiras que
+podem indicar potencial para maior utilização dos produtos e serviços.
+
+### Quantidade de oportunidades
+
+Também foi criado o indicador:
+
+`QTD_OPORTUNIDADES`
+
+O indicador representa a quantidade de regras de oportunidade atendidas
+simultaneamente por cada associado.
+
+O cálculo considera os três sinalizadores:
+
+- `OPORT_ALTA_RENDA_POUCOS_PRODUTOS`;
+- `OPORT_BAIXA_UTILIZACAO`;
+- `OPORT_POTENCIAL_CRESCIMENTO`.
+
+Cada regra atendida adiciona uma oportunidade ao indicador.
+
+A distribuição encontrada na base foi:
+
+| Quantidade de oportunidades | Associados |
+|---|---:|
+| 0 | 449 |
+| 1 | 293 |
+| 2 | 205 |
+| 3 | 53 |
+| **Total** | **1.000** |
+
+Dessa forma, **551 associados apresentam pelo menos uma oportunidade**.
+
+Entre eles, **53 associados atendem simultaneamente às três regras de
+oportunidade**, formando um grupo de maior prioridade para análise.
+
 ## Base processada
 
 Ao final do processamento é gerado automaticamente o arquivo:
@@ -259,7 +401,13 @@ Ao final do processamento é gerado automaticamente o arquivo:
 data/processed/teste_bi_classificada.xlsx
 ```
 
-Essa base contém os dados tratados, indicadores, score e classificação dos associados e será utilizada como fonte para o dashboard desenvolvido no Power BI.
+Essa base contém os dados tratados, indicadores, score, classificação e
+sinalizadores de oportunidades dos associados, sendo utilizada como fonte
+de dados para o dashboard desenvolvido no Power BI.
+
+O arquivo é gerado durante a execução do projeto e, por se tratar de uma
+saída processada, o diretório `data/processed/` não é versionado no
+repositório.
 
 ## Execução do projeto
 
@@ -284,24 +432,96 @@ Consolidação
     ↓
 Classificação
     ↓
+Identificação de oportunidades
+    ↓
 Exportação
+    ↓
+Power BI
 ```
 
-## Dashboard
+## Dashboard Power BI
 
-O dashboard será desenvolvido no Power BI utilizando a base processada gerada pelo pipeline Python.
+O dashboard foi desenvolvido no Power BI utilizando como fonte a base
+processada pelo pipeline Python.
 
-Entre as análises previstas estão:
+A solução foi organizada em quatro páginas analíticas.
 
-- distribuição dos associados por classificação;
-- quantidade de associados por agência;
-- quantidade de associados por cidade;
-- distribuição por faixa de renda;
-- utilização de produtos;
+### Página 1 - Visão Geral
+
+Apresenta uma visão consolidada dos associados, incluindo:
+
+- total de associados;
 - saldo médio;
-- utilização de PIX;
-- compras no cartão;
-- perfil dos associados por nível de relacionamento.
+- média de produtos por associado;
+- renda média;
+- associados por classificação;
+- associados por faixa de produtos;
+- PIX médio por classificação;
+- compras médias no cartão por classificação.
+
+### Página 2 - Relacionamento
+
+Apresenta análises relacionadas ao perfil e tempo de relacionamento dos
+associados:
+
+- associados por agência;
+- associados por cidade;
+- associados por faixa de renda;
+- associados por tempo de relacionamento;
+- média de produtos por tempo de relacionamento;
+- saldo médio por tempo de relacionamento.
+
+### Página 3 - Classificação
+
+Apresenta os resultados da metodologia de classificação desenvolvida no
+projeto:
+
+- total de associados;
+- score médio;
+- média de produtos;
+- saldo médio;
+- associados por classificação;
+- percentual por classificação;
+- saldo médio por classificação;
+- média de produtos por classificação;
+- média de PIX por classificação;
+- média de compras no cartão por classificação.
+
+### Página 4 - Oportunidades
+
+Apresenta os associados identificados pelas regras de oportunidade:
+
+- associados com pelo menos uma oportunidade;
+- associados com alta renda e poucos produtos;
+- associados com baixa utilização;
+- associados com três oportunidades simultâneas;
+- associados com oportunidade por agência;
+- associados com oportunidade por classificação;
+- associados por quantidade de oportunidades;
+- associados por tipo de oportunidade.
+
+As páginas possuem filtros interativos para permitir a exploração dos
+dados por diferentes características dos associados.
+
+## Principais resultados
+
+A análise da base permitiu identificar diferentes níveis de relacionamento
+entre os 1.000 associados analisados.
+
+A maior parcela encontra-se classificada como **Em Desenvolvimento**,
+representando 483 associados, seguida pelos associados classificados como
+**Maduros**, com 359 registros.
+
+A análise de oportunidades identificou **551 associados com pelo menos uma
+oportunidade**, correspondendo a 55,1% da base analisada.
+
+Entre eles, **53 associados atendem simultaneamente às três regras de
+oportunidade**, formando um grupo que pode receber atenção prioritária em
+ações de relacionamento.
+
+Também foram identificados **178 associados com renda mensal superior a
+R$ 15.000 e até dois produtos**, indicando potencial para ações de
+ampliação do relacionamento e oferta de produtos adequados ao perfil.
 
 ## Autor
 

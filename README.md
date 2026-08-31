@@ -33,12 +33,21 @@ As principais etapas desenvolvidas são:
 ```text
 desafio-bi/
 │
+├── dashboard/
+│   └── Teste_BI_Dashboard.pbix
+│
 ├── data/
 │   ├── raw/
 │   │   └── teste_bi_base_crua.xlsx
 │   │
 │   └── processed/
 │       └── [arquivos gerados durante a execução]
+│
+├── images/
+│   ├── Classificacao.png
+│   ├── oportunidades.png
+│   ├── relacionamento.png
+│   └── visao_geral.png
 │
 ├── src/
 │   ├── main.py
@@ -51,6 +60,7 @@ desafio-bi/
 │   └── exportacao.py
 │
 ├── .gitignore
+├── requirements.txt
 └── README.md
 ```
 
@@ -459,6 +469,8 @@ Apresenta uma visão consolidada dos associados, incluindo:
 - PIX médio por classificação;
 - compras médias no cartão por classificação.
 
+![Visão Geral](images/visao_geral.png)
+
 ### Página 2 - Relacionamento
 
 Apresenta análises relacionadas ao perfil e tempo de relacionamento dos
@@ -470,6 +482,8 @@ associados:
 - associados por tempo de relacionamento;
 - média de produtos por tempo de relacionamento;
 - saldo médio por tempo de relacionamento.
+
+![Relacionamento](images/relacionamento.png)
 
 ### Página 3 - Classificação
 
@@ -487,6 +501,8 @@ projeto:
 - média de PIX por classificação;
 - média de compras no cartão por classificação.
 
+![Classificação](images/classificacao.png)
+
 ### Página 4 - Oportunidades
 
 Apresenta os associados identificados pelas regras de oportunidade:
@@ -502,6 +518,8 @@ Apresenta os associados identificados pelas regras de oportunidade:
 
 As páginas possuem filtros interativos para permitir a exploração dos
 dados por diferentes características dos associados.
+
+![Oportunidades](images/oportunidades.png)
 
 ## Principais resultados
 

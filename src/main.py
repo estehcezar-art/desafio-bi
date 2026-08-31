@@ -77,7 +77,8 @@ def main():
                                   "FAIXA_RENDA",
                                   "DATA_ASSOCIACAO",
                                   "TEMPO_RELACIONAMENTO_MESES",
-                                  "TEMPO_RELACIONAMENTO"]
+                                  "TEMPO_RELACIONAMENTO",
+                                  "FAIXA_TEMPO_RELACIONAMENTO"]
                                 ].head(10)
          )
 
@@ -86,7 +87,10 @@ def main():
 
     print("\nTempos de relacionamento nulos:")
     print("Meses:",associados_indicadores["TEMPO_RELACIONAMENTO_MESES"].isnull().sum())
-    print(associados_indicadores["TEMPO_RELACIONAMENTO"].isnull().sum()) 
+    print("Formatado:",associados_indicadores["TEMPO_RELACIONAMENTO"].isnull().sum()) 
+
+    print("\nDistribuição por faixa de Tempo de Relacionamento:")
+    print(associados_indicadores["FAIXA_TEMPO_RELACIONAMENTO"].value_counts().sort_index())
 
     produtos_tratados = tratar_produtos(produtos)
 
@@ -111,10 +115,13 @@ def main():
     print("INDICADORES DE PRODUTOS")
     print("=" * 50)
 
-    print(produtos_indicadores[["CHAVE", "QTD_PRODUTOS"]].head(10))
+    print(produtos_indicadores[["CHAVE", "QTD_PRODUTOS","FAIXA_PRODUTOS"]].head(10))
 
     print("\nDistribuição da quantidade de produtos:")
     print(produtos_indicadores["QTD_PRODUTOS"].value_counts().sort_index())
+
+    print("\nDistribuição por faixa de produtos:")
+    print(produtos_indicadores["FAIXA_PRODUTOS"].value_counts().sort_index())
 
     movimentacao_tratada = tratar_movimentacao(movimentacao)
 

@@ -14,6 +14,21 @@ def criar_indicadores_produtos(produtos):
 
     produtos["QTD_PRODUTOS"] = (produtos[colunas_produtos] .eq("S").sum(axis=1))
 
+    produtos["FAIXA_PRODUTOS"] = pd.cut(
+        produtos["QTD_PRODUTOS"],
+        bins=[
+            -1,
+            1,
+            3,
+            6
+        ],
+        labels=[
+            "0 a 1 produto",
+            "2 a 3 produtos",
+            "4 a 6 produtos"
+        ]
+    )
+
     return produtos
 
 def formatar_tempo_relacionamento(total_meses):
@@ -72,4 +87,21 @@ def criar_indicadores_associados(associados):
         ]
     )
 
+    associados["FAIXA_TEMPO_RELACIONAMENTO"] = pd.cut(
+        associados["TEMPO_RELACIONAMENTO_MESES"],
+        bins=[
+            float("-inf"),
+            24, 
+            60,
+            96,
+            float("inf")
+        ],
+        labels=[
+            "Até 2 anos",
+            "De 2 a 5 anos",
+            "De 5 a 8 anos",
+            "Acima de 8 anos"
+        ]
+    )
+    
     return associados

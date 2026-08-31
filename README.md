@@ -41,7 +41,7 @@ desafio-bi/
 │   │   └── teste_bi_base_crua.xlsx
 │   │
 │   └── processed/
-│       └── [arquivos gerados durante a execução]
+│       └── teste_bi_classificada.xlsx
 │
 ├── images/
 │   ├── Classificacao.png

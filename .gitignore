@@ -10,3 +10,6 @@ __pycache__/
 
 # Arquivos temporários do Excel
 ~$*.xlsx
+
+# Arquivos processados gerados pelo projeto
+data/processed/

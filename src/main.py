@@ -8,6 +8,7 @@ from indicadores import (criar_indicadores_produtos,
 from consolidacao import consolidar_bases
 from classificacao import classificar_associados
 from exportacao import exportar_base
+from oportunidades import identificar_oportunidades
 
 def analisar_base(nome, df):
     print(f"\n{'=' * 50}")
@@ -179,10 +180,110 @@ def main():
                            ].head(10)
          )
 
-    print("\nDistribuição das classificações:")
     print(base_classificada["CLASSIFICACAO"].value_counts())
 
-    exportar_base(base_classificada)
+    base_oportunidades = identificar_oportunidades(base_classificada)
+
+    print(">>> FUNÇÃO DE OPORTUNIDADES EXECUTADA <<<")
+
+    print("\n" + "=" * 50)
+    print("OPORTUNIDADES - ALTA RENDA E POUCOS PRODUTOS")
+    print("=" * 50)
+
+    print(base_oportunidades[
+            base_oportunidades[
+            "OPORT_ALTA_RENDA_POUCOS_PRODUTOS"
+        ]
+    ][
+        [
+            "CHAVE",
+            "NOME",
+            "AGENCIA",
+            "CIDADE",
+            "RENDA_MENSAL",
+            "QTD_PRODUTOS",
+            "CLASSIFICACAO"
+        ]
+    ].head(10)
+    )
+
+    print("\nQuantidade de associados com oportunidade:",base_oportunidades["OPORT_ALTA_RENDA_POUCOS_PRODUTOS"].sum())
+
+    print("\n" + "=" * 50)
+    print("OPORTUNIDADES - BAIXA UTILIZAÇÃO")
+    print("=" * 50)
+
+    print(base_oportunidades[
+        base_oportunidades[
+            "OPORT_BAIXA_UTILIZACAO"
+        ]
+    ][
+        [
+            "CHAVE",
+            "NOME",
+            "AGENCIA",
+            "CIDADE",
+            "PIX_MENSAL",
+            "COMPRAS_CARTAO",
+            "QTD_PRODUTOS",
+            "CLASSIFICACAO"
+        ]
+    ].head(10)
+    )
+
+    print("\nQuantidade de associados com baixa utilização:", base_oportunidades["OPORT_BAIXA_UTILIZACAO"].sum())
+
+    print("\n" + "=" * 50)
+    print("OPORTUNIDADES - POTENCIAL DE CRESCIMENTO")
+    print("=" * 50)
+
+    print(base_oportunidades[
+        base_oportunidades[
+            "OPORT_POTENCIAL_CRESCIMENTO"
+        ]
+    ][
+        [
+            "CHAVE",
+            "NOME",
+            "AGENCIA",
+            "CIDADE",
+            "RENDA_MENSAL",
+            "SALDO_MEDIO",
+            "QTD_PRODUTOS",
+            "CLASSIFICACAO"
+        ]
+    ].head(10)
+    )
+
+    print("\nQuantidade de associados com potencial de crescimento:", base_oportunidades["OPORT_POTENCIAL_CRESCIMENTO"].sum())
+
+    print("\n" + "=" * 50)
+    print("QUANTIDADE DE OPORTUNIDADES POR ASSOCIADO")
+    print("=" * 50)
+
+    print(base_oportunidades["QTD_OPORTUNIDADES"].value_counts().sort_index())
+
+    print("\nAssociados com 3 oportunidades:")
+
+    print(base_oportunidades[
+        base_oportunidades["QTD_OPORTUNIDADES"] == 3
+    ][
+        [
+            "CHAVE",
+            "NOME",
+            "AGENCIA",
+            "CIDADE",
+            "RENDA_MENSAL",
+            "QTD_PRODUTOS",
+            "PIX_MENSAL",
+            "COMPRAS_CARTAO",
+            "SALDO_MEDIO",
+            "CLASSIFICACAO"
+        ]
+    ].head(10)
+    )
+
+    exportar_base(base_oportunidades)
 
 if __name__ == "__main__":
     main()
